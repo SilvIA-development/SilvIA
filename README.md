@@ -77,5 +77,13 @@ SilvIA combines state-of-the-art AI models to:
 
 ---
 
-## 📬 Conta
+## 📬 Contact
+- **Alejandro Cano Rojas** – [Email](mailto:canorojas.alejandro@gmail.com) | +34 633314522  
+- **Dongshik Won** – [Email](mailto:dwon@kaist.ac.kr)  
+- **Sung Min Cho** – [Email](mailto:sungmincho3@gmail.com)  
+
+---
+
+## 📌 Status
+Concept phase – **open for collaborators, co-founders, and seed-level funding**.  
 
