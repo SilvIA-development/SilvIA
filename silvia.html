@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SilvIA - Monitoreo Forestal Inteligente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c2b 0%, #2d5b42 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+        }
+
+        .main-content {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section h3 {
+            color: #4ade80;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .alert {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-high {
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .alert-medium {
+            border-color: rgba(245, 158, 11, 0.5);
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn.active {
+            background: #4ade80;
+            border-color: #4ade80;
+            color: #000;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 8px;
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .legend {
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            border-radius: 8px;
+            z-index: 10000;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            animation: progressPulse 2s infinite;
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .analysis-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .analysis-panel.active {
+            transform: translateY(0);
+        }
+
+        .analysis-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab.active {
+            background: #4ade80;
+            color: #000;
+        }
+
+        .prediction-chart {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                max-height: 200px;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .map-overlay {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-leaf" style="color: #4ade80; font-size: 1.5rem;"></i>
+            <h1>SilvIA</h1>
+            <span style="opacity: 0.7; font-size: 0.9rem;">Sistema de Monitoreo Forestal</span>
+        </div>
+        <div class="status">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Sistema Activo</span>
+            </div>
+            <div class="status-indicator">
+                <i class="fas fa-satellite"></i>
+                <span>Sentinel-2 Conectado</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="section">
+                <h3><i class="fas fa-chart-line"></i> Métricas en Tiempo Real</h3>
+                <div class="metric-card">
+                    <div class="metric-value" id="forest-coverage">87.3%</div>
+                    <div class="metric-label">Cobertura Forestal</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="ndvi-value">0.82</div>
+                    <div class="metric-label">NDVI Promedio</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="biomass-estimate">245 t/ha</div>
+                    <div class="metric-label">Biomasa Estimada</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="change-detection">-2.1%</div>
+                    <div class="metric-label">Cambio Mensual</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3><i class="fas fa-exclamation-triangle"></i> Alertas Activas</h3>
+                <div class="alert alert-high">
+                    <div style="font-weight: bold;">🔥 Riesgo Incendio Alto</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Zona Norte - Humedad: 23%</div>
+                </div>
+                <div class="alert alert-medium">
+                    <div style="font-weight: bold;">⚠️ Deforestación Detectada</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Sector B - Área: 2.3 ha</div>
+                </div>
+                <div class="alert">
+                    <div style="font-weight: bold;">📊 Análisis Completado</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Clasificación actualizada</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3><i class="fas fa-cogs"></i> Controles de Análisis</h3>
+                <div class="controls" style="flex-direction: column;">
+                    <button class="btn active" onclick="toggleLayer('forest')">
+                        <i class="fas fa-tree"></i> Clasificación Forestal
+                    </button>
+                    <button class="btn" onclick="toggleLayer('ndvi')">
+                        <i class="fas fa-leaf"></i> Índice NDVI
+                    </button>
+                    <button class="btn" onclick="toggleLayer('fire')">
+                        <i class="fas fa-fire"></i> Riesgo de Incendio
+                    </button>
+                    <button class="btn" onclick="toggleLayer('change')">
+                        <i class="fas fa-exchange-alt"></i> Detección de Cambios
+                    </button>
+                    <button class="btn" onclick="runAnalysis()">
+                        <i class="fas fa-play"></i> Ejecutar Análisis IA
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="map"></div>
+            
+            <div class="map-overlay">
+                <h4 style="margin-bottom: 1rem; color: #4ade80;">Información de Capa</h4>
+                <div id="layer-info">
+                    <strong>Clasificación Forestal</strong>
+                    <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">
+                        Modelo: DeepLabV3+<br>
+                        Precisión: 94.2%<br>
+                        Última actualización: Hoy
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #22c55e;"></div>
+                        <span>Bosque Saludable</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #eab308;"></div>
+                        <span>Bosque Degradado</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>Deforestación</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>Agua</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-panel" id="analysis-panel">
+                <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: #4ade80;">Panel de Análisis Avanzado</h3>
+                    <button class="btn" onclick="toggleAnalysisPanel()" style="margin-left: auto;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="analysis-tabs">
+                    <div class="tab active" onclick="showAnalysisTab('prediction')">Predicción</div>
+                    <div class="tab" onclick="showAnalysisTab('trends')">Tendencias</div>
+                    <div class="tab" onclick="showAnalysisTab('alerts')">Alertas</div>
+                </div>
+
+                <div id="prediction-content" class="analysis-content">
+                    <div class="prediction-chart">
+                        <h4>Predicción de Riesgo de Incendio - Próximos 7 días</h4>
+                        <canvas id="prediction-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div id="trends-content" class="analysis-content" style="display: none;">
+                    <div class="prediction-chart">
+                        <h4>Tendencias de Cobertura Forestal - Últimos 12 meses</h4>
+                        <div style="padding: 2rem; text-align: center; opacity: 0.7;">
+                            Gráfico de tendencias temporales...
+                        </div>
+                    </div>
+                </div>
+
+                <div id="alerts-content" class="analysis-content" style="display: none;">
+                    <div class="prediction-chart">
+                        <h4>Configuración de Alertas</h4>
+                        <div style="padding: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem;">
+                                <input type="checkbox" checked> Alertas de deforestación
+                            </label>
+                            <label style="display: block; margin-bottom: 0.5rem;">
+                                <input type="checkbox" checked> Alertas de incendio
+                            </label>
+                            <label style="display: block; margin-bottom: 0.5rem;">
+                                <input type="checkbox"> Alertas de cambio climático
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner"></div>
+        <div>
+            <div>Procesando datos satelitales...</div>
+            <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;" id="loading-status">
+                Inicializando modelos de IA
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        // Inicializar mapa
+        const map = L.map('map').setView([40.4168, -3.7038], 10); // Madrid, España
+
+        // Capa base del mapa
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Variables globales
+        let currentLayer = 'forest';
+        let analysisRunning = false;
+        let forestLayer, ndviLayer, fireLayer, changeLayer;
+
+        // Datos simulados para las capas
+        const forestData = [
+            { lat: 40.4168, lng: -3.7038, type: 'healthy', value: 0.85 },
+            { lat: 40.4268, lng: -3.7138, type: 'degraded', value: 0.45 },
+            { lat: 40.4068, lng: -3.6938, type: 'deforested', value: 0.15 },
+            { lat: 40.4368, lng: -3.7238, type: 'healthy', value: 0.92 },
+            { lat: 40.4168, lng: -3.6838, type: 'water', value: 0.05 }
+        ];
+
+        // Crear capas de datos
+        function createForestLayer() {
+            const markers = forestData.map(point => {
+                const color = getColorForType(point.type);
+                const circle = L.circleMarker([point.lat, point.lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.7,
+                    radius: 15
+                });
+                
+                circle.bindPopup(`
+                    <strong>Clasificación:</strong> ${getTypeLabel(point.type)}<br>
+                    <strong>Confianza:</strong> ${(point.value * 100).toFixed(1)}%<br>
+                    <strong>Coordenadas:</strong> ${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}
+                `);
+                
+                return circle;
+            });
+            
+            return L.layerGroup(markers);
+        }
+
+        function getColorForType(type) {
+            const colors = {
+                'healthy': '#22c55e',
+                'degraded': '#eab308',
+                'deforested': '#ef4444',
+                'water': '#3b82f6'
+            };
+            return colors[type] || '#gray';
+        }
+
+        function getTypeLabel(type) {
+            const labels = {
+                'healthy': 'Bosque Saludable',
+                'degraded': 'Bosque Degradado',
+                'deforested': 'Deforestación',
+                'water': 'Agua'
+            };
+            return labels[type] || 'Desconocido';
+        }
+
+        // Alternar capas
+        function toggleLayer(layerType) {
+            // Actualizar botones
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Limpiar capas anteriores
+            map.eachLayer(layer => {
+                if (layer !== map._layers[Object.keys(map._layers)[0]]) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Agregar nueva capa
+            currentLayer = layerType;
+            switch(layerType) {
+                case 'forest':
+                    if (!forestLayer) forestLayer = createForestLayer();
+                    map.addLayer(forestLayer);
+                    updateLayerInfo('Clasificación Forestal', 'DeepLabV3+', '94.2%');
+                    break;
+                case 'ndvi':
+                    createNDVILayer();
+                    updateLayerInfo('Índice NDVI', 'Sentinel-2', '99.1%');
+                    break;
+                case 'fire':
+                    createFireRiskLayer();
+                    updateLayerInfo('Riesgo de Incendio', 'XGBoost', '89.7%');
+                    break;
+                case 'change':
+                    createChangeDetectionLayer();
+                    updateLayerInfo('Detección de Cambios', 'Siamese Network', '91.8%');
+                    break;
+            }
+        }
+
+        function createNDVILayer() {
+            const ndviData = forestData.map(point => ({
+                ...point,
+                ndvi: Math.random() * 0.8 + 0.2
+            }));
+
+            const markers = ndviData.map(point => {
+                const intensity = point.ndvi;
+                const color = `rgb(${Math.floor(255 * (1 - intensity))}, ${Math.floor(255 * intensity)}, 0)`;
+                
+                return L.circleMarker([point.lat, point.lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.7,
+                    radius: 12
+                }).bindPopup(`<strong>NDVI:</strong> ${point.ndvi.toFixed(3)}`);
+            });
+
+            L.layerGroup(markers).addTo(map);
+        }
+
+        function createFireRiskLayer() {
+            const fireData = forestData.map(point => ({
+                ...point,
+                risk: Math.random()
+            }));
+
+            const markers = fireData.map(point => {
+                const risk = point.risk;
+                const color = `rgb(255, ${Math.floor(255 * (1 - risk))}, 0)`;
+                
+                return L.circleMarker([point.lat, point.lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    radius: 10 + risk * 10
+                }).bindPopup(`<strong>Riesgo de Incendio:</strong> ${(risk * 100).toFixed(1)}%`);
+            });
+
+            L.layerGroup(markers).addTo(map);
+        }
+
+        function createChangeDetectionLayer() {
+            const changeData = forestData.map(point => ({
+                ...point,
+                change: (Math.random() - 0.5) * 0.4
+            }));
+
+            const markers = changeData.map(point => {
+                const change = point.change;
+                const color = change > 0 ? '#22c55e' : '#ef4444';
+                
+                return L.circleMarker([point.lat, point.lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.7,
+                    radius: 8 + Math.abs(change) * 20
+                }).bindPopup(`<strong>Cambio Detectado:</strong> ${(change * 100).toFixed(1)}%`);
+            });
+
+            L.layerGroup(markers).addTo(map);
+        }
+
+        function updateLayerInfo(name, model, accuracy) {
+            document.getElementById('layer-info').innerHTML = `
+                <strong>${name}</strong>
+                <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">
+                    Modelo: ${model}<br>
+                    Precisión: ${accuracy}<br>
+                    Última actualización: Hoy
+                </div>
+            `;
+        }
+
+        // Ejecutar análisis
+        function runAnalysis() {
+            if (analysisRunning) return;
+            
+            analysisRunning = true;
+            showLoading();
+            
+            const steps = [
+                'Inicializando modelos de IA',
+                'Descargando datos Sentinel-2',
+                'Procesando imágenes satelitales',
+                'Aplicando correcciones atmosféricas',
+                'Calculando índices de vegetación',
+                'Ejecutando segmentación semántica',
+                'Detectando cambios temporales',
+                'Evaluando riesgo de incendio',
+                'Generando alertas',
+                'Finalizando análisis'
+            ];
+            
+            let currentStep = 0;
+            const progressInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    document.getElementById('loading-status').textContent = steps[currentStep];
+                    document.getElementById('progress-fill').style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+                    currentStep++;
+                } else {
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        hideLoading();
+                        analysisRunning = false;
+                        updateMetrics();
+                        showAnalysisPanel();
+                    }, 1000);
+                }
+            }, 800);
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function updateMetrics() {
+            // Simular actualización de métricas
+            const metrics = {
+                'forest-coverage': (87.3 + (Math.random() - 0.5) * 2).toFixed(1) + '%',
+                'ndvi-value': (0.82 + (Math.random() - 0.5) * 0.1).toFixed(2),
+                'biomass-estimate': Math.floor(245 + (Math.random() - 0.5) * 50) + ' t/ha',
+                'change-detection': ((Math.random() - 0.5) * 5).toFixed(1) + '%'
+            };
+
+            Object.entries(metrics).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.transform = 'scale(1.1)';
+                    element.style.color = '#4ade80';
+                    setTimeout(() => {
+                        element.textContent = value;
+                        element.style.transform = 'scale(1)';
+                        element.style.color = '#4ade80';
+                    }, 300);
+                }
+            });
+        }
+
+        function showAnalysisPanel() {
+            document.getElementById('analysis-panel').classList.add('active');
+            drawPredictionChart();
+        }
+
+        function toggleAnalysisPanel() {
+            document.getElementById('analysis-panel').classList.toggle('active');
+        }
+
+        function showAnalysisTab(tabName) {
+            // Actualizar tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Mostrar contenido correspondiente
+            document.querySelectorAll('.analysis-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(tabName + '-content').style.display = 'block';
+
+            if (tabName === 'prediction') {
+                drawPredictionChart();
+            }
+        }
+
+        function drawPredictionChart() {
+            const canvas = document.getElementById('prediction-chart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Limpiar canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Datos de ejemplo para la predicción
+            const days = ['Hoy', 'Mañana', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            const riskData = [0.3, 0.5, 0.7, 0.9, 0.8, 0.6, 0.4];
+
+            // Configurar el gráfico
+            const padding = 40;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+
+            // Dibujar ejes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            
+            // Eje Y
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.stroke();
+            
+            // Eje X
+            ctx.beginPath();
+            ctx.moveTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+
+            // Dibujar línea de predicción
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            riskData.forEach((risk, index) => {
+                const x = padding + (index / (riskData.length - 1)) * chartWidth;
+                const y = height - padding - (risk * chartHeight);
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+
+            // Dibujar puntos
+            riskData.forEach((risk, index) => {
+                const x = padding + (index / (riskData.length - 1)) * chartWidth;
+                const y = height - padding - (risk * chartHeight);
+                
+                ctx.fillStyle = risk > 0.7 ? '#ef4444' : risk > 0.5 ? '#eab308' : '#22c55e';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            // Etiquetas del eje X
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            days.forEach((day, index) => {
+                const x = padding + (index / (days.length - 1)) * chartWidth;
+                ctx.fillText(day, x, height - padding + 20);
+            });
+
+            // Etiquetas del eje Y
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                const y = height - padding - (i / 4) * chartHeight;
+                const value = (i / 4 * 100).toFixed(0) + '%';
+                ctx.fillText(value, padding - 10, y + 5);
+            }
+        }
+
+        // Inicializar la aplicación
+        function initializeApp() {
+            // Crear capa inicial
+            forestLayer = createForestLayer();
+            map.addLayer(forestLayer);
+            
+            // Actualizar métricas cada 30 segundos
+            setInterval(updateMetrics, 30000);
+            
+            // Simular datos en tiempo real
+            setInterval(() => {
+                if (!analysisRunning) {
+                    simulateRealTimeData();
+                }
+            }, 5000);
+        }
+
+        function simulateRealTimeData() {
+            // Simular pequeños cambios en los datos
+            forestData.forEach(point => {
+                point.value += (Math.random() - 0.5) * 0.02;
+                point.value = Math.max(0, Math.min(1, point.value));
+            });
+
+            // Actualizar capa actual si es necesario
+            if (currentLayer === 'forest' && forestLayer) {
+                map.removeLayer(forestLayer);
+                forestLayer = createForestLayer();
+                map.addLayer(forestLayer);
+            }
+        }
+
+        // Event listeners
+        map.on('click', function(e) {
+            const popup = L.popup()
+                .setLatLng(e.latlng)
+                .setContent(`
+                    <div style="text-align: center;">
+                        <strong>Análisis de Punto</strong><br>
+                        <small>Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}</small><br>
+                        <button onclick="analyzePoint(${e.latlng.lat}, ${e.latlng.lng})" 
+                                style="margin-top: 5px; padding: 5px 10px; background: #4ade80; border: none; border-radius: 4px; cursor: pointer;">
+                            Analizar Área
+                        </button>
+                    </div>
+                `)
+                .openOn(map);
+        });
+
+        function analyzePoint(lat, lng) {
+            map.closePopup();
+            
+            // Simular análisis de punto específico
+            const analysisResults = {
+                forestHealth: Math.random() * 100,
+                fireRisk: Math.random() * 100,
+                biomass: Math.random() * 300 + 100,
+                ndvi: Math.random() * 0.8 + 0.2
+            };
+
+            const resultPopup = L.popup()
+                .setLatLng([lat, lng])
+                .setContent(`
+                    <div style="min-width: 200px;">
+                        <strong>Resultados del Análisis</strong><br>
+                        <hr style="margin: 5px 0;">
+                        <div style="margin: 5px 0;">
+                            <strong>Salud Forestal:</strong> ${analysisResults.forestHealth.toFixed(1)}%
+                        </div>
+                        <div style="margin: 5px 0;">
+                            <strong>Riesgo de Incendio:</strong> ${analysisResults.fireRisk.toFixed(1)}%
+                        </div>
+                        <div style="margin: 5px 0;">
+                            <strong>Biomasa:</strong> ${analysisResults.biomass.toFixed(0)} t/ha
+                        </div>
+                        <div style="margin: 5px 0;">
+                            <strong>NDVI:</strong> ${analysisResults.ndvi.toFixed(3)}
+                        </div>
+                    </div>
+                `)
+                .openOn(map);
+        }
+
+        // Inicializar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            
+            // Simular carga inicial
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 500);
+        });
+
+        // Funciones de utilidad para API simulada
+        class SilviaAPI {
+            static async getForestData(bounds) {
+                // Simular llamada a API
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve({
+                            status: 'success',
+                            data: forestData,
+                            metadata: {
+                                timestamp: new Date().toISOString(),
+                                model_version: 'v2.1.0',
+                                confidence: 0.942
+                            }
+                        });
+                    }, 1000);
+                });
+            }
+
+            static async runClassification(imageData) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve({
+                            status: 'success',
+                            results: {
+                                classes: ['forest', 'degraded', 'deforested', 'water'],
+                                probabilities: [0.85, 0.10, 0.03, 0.02],
+                                confidence: 0.94
+                            }
+                        });
+                    }, 2000);
+                });
+            }
+
+            static async getFireRiskPrediction(coordinates, days = 7) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const predictions = Array.from({length: days}, () => Math.random());
+                        resolve({
+                            status: 'success',
+                            predictions: predictions,
+                            model: 'XGBoost_v1.2',
+                            features_used: ['temperature', 'humidity', 'wind_speed', 'ndvi', 'elevation']
+                        });
+                    }, 1500);
+                });
+            }
+        }
+
+        // Funciones adicionales para demostración
+        function exportData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                region: 'Madrid Forest Reserve',
+                metrics: {
+                    forest_coverage: document.getElementById('forest-coverage').textContent,
+                    ndvi_average: document.getElementById('ndvi-value').textContent,
+                    biomass_estimate: document.getElementById('biomass-estimate').textContent,
+                    monthly_change: document.getElementById('change-detection').textContent
+                },
+                alerts: [
+                    { type: 'fire_risk', level: 'high', location: 'North Zone' },
+                    { type: 'deforestation', level: 'medium', location: 'Sector B' }
+                ]
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], 
+                                { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `silvia_report_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Configurar atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        toggleLayer('forest');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        toggleLayer('ndvi');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        toggleLayer('fire');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        toggleLayer('change');
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        runAnalysis();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        exportData();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                if (document.getElementById('analysis-panel').classList.contains('active')) {
+                    toggleAnalysisPanel();
+                }
+            }
+        });
+
+        // Agregar tooltips informativos
+        function addTooltips() {
+            const tooltipElements = document.querySelectorAll('[data-tooltip]');
+            tooltipElements.forEach(element => {
+                element.addEventListener('mouseenter', showTooltip);
+                element.addEventListener('mouseleave', hideTooltip);
+            });
+        }
+
+        function showTooltip(e) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = e.target.getAttribute('data-tooltip');
+            tooltip.style.cssText = `
+                position: absolute;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                z-index: 10000;
+                pointer-events: none;
+                white-space: nowrap;
+            `;
+            document.body.appendChild(tooltip);
+            
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+        }
+
+        function hideTooltip() {
+            const tooltip = document.querySelector('.tooltip');
+            if (tooltip) {
+                tooltip.remove();
+            }
+        }
+
+        console.log('🌲 SilvIA - Sistema de Monitoreo Forestal Inteligente inicializado');
+        console.log('📊 Funcionalidades disponibles:');
+        console.log('  • Clasificación semántica de bosques');
+        console.log('  • Análisis de índices de vegetación (NDVI)');
+        console.log('  • Predicción de riesgo de incendios');
+        console.log('  • Detección de cambios temporales');
+        console.log('  • Alertas en tiempo real');
+        console.log('🔧 Atajos de teclado:');
+        console.log('  • Ctrl+1-4: Cambiar capas');
+        console.log('  • Ctrl+Enter: Ejecutar análisis');
+        console.log('  • Ctrl+E: Exportar datos');
+        console.log('  • Escape: Cerrar paneles');
+    </script>
+</body>
+</html>
