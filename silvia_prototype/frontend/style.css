@@ -1,0 +1,197 @@
+/* --- VARIABLES DE COLOR Y FUENTE --- */
+:root {
+    --primary-bg: #1a202c;
+    --secondary-bg: #2d3748;
+    --header-bg: #171923;
+    --border-color: #4a5568;
+    --text-primary: #e2e8f0;
+    --text-secondary: #a0aec0;
+    --accent-color: #38a169;
+    --accent-color-hover: #48bb78;
+    --font-family: 'Inter', sans-serif;
+    --header-height: 80px; /* CORREGIDO: Cabecera un poco más pequeña */
+}
+
+/* --- RESET Y ESTRUCTURA FLEXBOX GLOBAL --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- CABECERA PRINCIPAL --- */
+.header {
+    height: var(--header-height);
+    background-color: var(--header-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Alinear elementos */
+    padding: 0 25px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.logo-img {
+    height: 130px; /* CORREGIDO: Logo más grande */
+}
+
+/* --- NUEVO: NAVEGACIÓN --- */
+.navigation {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+}
+/* --- FIN NUEVO --- */
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #f56565; /* Rojo por defecto (inactivo) */
+}
+
+input[type="date"] {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 6px;
+    font-family: var(--font-family);
+}
+
+/* --- CONTENEDOR PRINCIPAL (Sidebar + Mapa) --- */
+.container {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* --- BARRA LATERAL --- */
+.sidebar {
+    width: 300px;
+    background-color: var(--primary-bg);
+    padding: 20px;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Espacio entre secciones */
+    flex-shrink: 0;
+}
+
+.section h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.layer-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.layer-control label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+/* --- CAJA DE INFORMACIÓN --- */
+.info-box {
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 15px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.info-box strong {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* --- CONTENIDO PRINCIPAL Y MAPA --- */
+.main-content {
+    flex-grow: 1;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+/* --- OVERLAY DE CARGA --- */
+.loading-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    gap: 15px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.loading-overlay.hidden { display: none; }
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-left-color: var(--accent-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-info {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SilvIA - Cargar y Visualizar GeoTIFF</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- El CSS de OpenLayers ya no es necesario -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="upload.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="logo.png" alt="SilvIA Logo" class="logo-img">
+        </div>
+        <div class="navigation">
+            <a href="silvia.html" class="nav-link">Mapa Principal</a>
+        </div>
+    </div>
+
+    <div class="container upload-container">
+        <div class="upload-box">
+            <h2>Analizador de Bandas GeoTIFF</h2>
+            <p>Sube un archivo GeoTIFF multiespectral para analizar sus bandas individuales.</p>
+            <div id="drop-area" class="drop-area">
+                <input type="file" id="fileElem" accept=".tif,.tiff" style="display:none">
+                <label for="fileElem" id="file-label">
+                    <p>Arrastra y suelta tu archivo aquí o <strong>haz clic para seleccionar</strong>.</p>
+                    <span>Solo se permiten archivos .tif o .tiff.</span>
+                </label>
+            </div>
+            <div id="progress-bar" class="progress-bar" style="display:none;">
+                <div class="progress-bar-fill"></div>
+            </div>
+            <div id="upload-status" class="upload-status"></div>
+            <!-- Botón de Visualización (cambiado) -->
+            <button id="visualize-btn" class="visualize-button" style="display: none;">Analizar Bandas</button>
+        </div>
+
+        <!-- Nuevo Contenedor del Visualizador de Bandas -->
+        <div id="viewer-container" class="viewer-container" style="display: none;">
+            <div id="band-controls" class="band-controls">
+                <!-- Los controles de las bandas se insertarán aquí dinámicamente -->
+            </div>
+            <div class="image-display-area">
+                <img id="band-image" src="" alt="Visualización de la banda">
+                 <div id="band-info" class="band-info"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- El JS de OpenLayers ya no es necesario, solo nuestro script -->
+    <script src="upload.js"></script>
+</body>
+</html>

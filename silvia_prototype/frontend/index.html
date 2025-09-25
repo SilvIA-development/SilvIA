@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SILVIA — Tailwind (CDN) Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: "#1a202c",
+              foreground: "#e2e8f0",
+              card: "#2d3748",
+              border: "#4a5568",
+              primary: "#38a169",
+              destructive: "#e53e3e",
+              muted: "#2d3748",
+              'muted-foreground': "#a0aec0",
+            },
+            borderRadius: { lg: "12px" }
+          }
+        }
+      }
+    </script>
+    <style>body{background:#1a202c;color:#e2e8f0}</style>
+  </head>
+  <body class="min-h-screen">
+    <header class="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 font-bold"><span class="text-2xl">🛰️</span> SILVIA</div>
+        <nav class="hidden md:flex items-center gap-6 text-muted-foreground">
+          <a href="#features" class="hover:text-foreground">Features</a>
+          <a href="#how" class="hover:text-foreground">How It Works</a>
+          <a href="/silvia.html" class="hover:text-foreground">Demo</a>
+          <button class="px-3 py-2 border border-border rounded-lg hover:bg-card">Sign In</button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="relative py-20 lg:py-28 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-muted/50"></div>
+        <div class="relative max-w-4xl mx-auto px-4 text-center">
+          <span class="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 text-foreground rounded-lg px-3 py-1 mb-6">🛰️ AI-Powered Environmental Monitoring</span>
+          <h1 class="text-4xl lg:text-6xl font-extrabold mb-4">Predictive Insights for <span class="text-primary">Fire Prevention</span></h1>
+          <p class="text-lg text-muted-foreground mb-6">Harness satellite imagery + AI to identify fire risks, monitor forest health, and protect ecosystems.</p>
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/silvia.html" class="px-5 py-3 rounded-lg bg-primary text-foreground hover:opacity-90">Get Started →</a>
+            <button class="px-5 py-3 rounded-lg border border-border hover:bg-card">Watch Demo</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="py-16 bg-muted/30">
+        <div class="max-w-6xl mx-auto px-4">
+          <div class="text-center mb-10">
+            <h2 class="text-3xl lg:text-4xl font-bold">Advanced Environmental Intelligence</h2>
+            <p class="text-lg text-muted-foreground">Real-time analysis for environmental protection.</p>
+          </div>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition"><div class="w-12 h-12 rounded-lg bg-destructive/20 flex items-center justify-center mb-3 text-2xl">🔥</div><div class="font-semibold mb-1">Fire Risk Assessment</div><p class="text-sm text-muted-foreground">Moisture + weather patterns → fire danger.</p></div>
+            <div class="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition"><div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-3 text-2xl">🌲</div><div class="font-semibold mb-1">Forest Health Monitoring</div><p class="text-sm text-muted-foreground">Detect disease + deforestation early.</p></div>
+            <div class="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition"><div class="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center mb-3 text-2xl">🌍</div><div class="font-semibold mb-1">Soil Condition Analysis</div><p class="text-sm text-muted-foreground">Moisture, erosion and nutrients.</p></div>
+            <div class="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition"><div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-3 text-2xl">🛡️</div><div class="font-semibold mb-1">Early Warning System</div><p class="text-sm text-muted-foreground">Alerts at critical thresholds.</p></div>
+            <div class="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition"><div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-3 text-2xl">📊</div><div class="font-semibold mb-1">Predictive Analytics</div><p class="text-sm text-muted-foreground">Forecast weeks in advance.</p></div>
+            <div class="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition"><div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-3 text-2xl">🛰️</div><div class="font-semibold mb-1">Multi-Satellite Integration</div><p class="text-sm text-muted-foreground">Comprehensive coverage.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="how" class="py-16">
+        <div class="max-w-6xl mx-auto px-4">
+          <div class="text-center mb-10">
+            <h2 class="text-3xl lg:text-4xl font-bold">How SILVIA Works</h2>
+            <p class="text-lg text-muted-foreground">Three steps from pixels to decisions.</p>
+          </div>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="text-center bg-card border border-border rounded-lg p-5"><div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold">1</div><div class="font-semibold mb-2">Data Collection</div><p class="text-sm text-muted-foreground">Multi-band satellite ingestion.</p></div>
+            <div class="text-center bg-card border border-border rounded-lg p-5"><div class="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center text-xl font-bold">2</div><div class="font-semibold mb-2">AI Analysis</div><p class="text-sm text-muted-foreground">Detect patterns & anomalies.</p></div>
+            <div class="text-center bg-card border border-border rounded-lg p-5"><div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold">3</div><div class="font-semibold mb-2">Actionable Insights</div><p class="text-sm text-muted-foreground">Dashboards & alerts.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" class="py-16 bg-muted/30">
+        <div class="max-w-6xl mx-auto px-4">
+          <div class="text-center mb-8"><h2 class="text-3xl lg:text-4xl font-bold">Try SILVIA Demo</h2><p class="text-lg text-muted-foreground">Click a region to run simulated analysis.</p></div>
+          <div id="layerControls" class="flex flex-wrap gap-2 mb-3"></div>
+          <div class="relative h-96 rounded-lg border border-border overflow-hidden bg-gradient-to-br from-blue-500/10 to-primary/10">
+            <svg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full">
+              <path d="M15,20 L85,15 L90,25 L85,35 L80,45 L85,55 L80,65 L75,75 L65,85 L45,90 L25,85 L15,75 L10,65 L15,55 L10,45 L15,35 L20,25 Z" fill="rgba(56,161,105,0.10)" stroke="rgba(56,161,105,0.4)" stroke-width="0.5"></path>
+              <g id="regionDots"></g>
+            </svg>
+            <div id="legend" class="absolute left-4 bottom-4 bg-white/10 border border-border backdrop-blur px-3 py-2 rounded-lg text-sm"></div>
+          </div>
+          <div id="analysisPanel" class="mt-4 hidden"></div>
+          <div id="instructions" class="mt-4 p-8 text-center border border-border rounded-lg bg-card">
+            <div class="text-5xl mb-2">📍</div>
+            <h3 class="text-xl font-semibold mb-1">Select a Region on the Map</h3>
+            <p class="text-muted-foreground mb-4">Use the chips above to toggle data layers.</p>
+            <button class="px-4 py-2 rounded-lg bg-primary hover:opacity-90" onclick="handleAnalyzeRegion(1)">Try Andalucía</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="py-12 border-t border-border bg-muted/30">
+      <div class="max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">© 2025 SILVIA. All rights reserved.</div>
+    </footer>
+
+    <!-- CORREGIDO: Rutas a los scripts estáticos -->
+    <script src="/static/demo.js"></script>
+    <script src="/static/animations.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silvia</title>
+    <!-- CORREGIDO: Ruta estática y versión consistente -->
+    <link rel="stylesheet" href="/static/style.css?v=4.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.0.0/ol.css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.0.0/dist/ol.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Cabecera principal de la aplicación -->
+    <header class="header">
+        <div class="logo">
+            <!-- CORREGIDO: Ruta estática -->
+            <img src="/static/logo.png" alt="Silvia Logo" class="logo-img">
+        </div>
+        
+        <nav class="navigation">
+            <a href="/" class="nav-link">Principal</a>
+            <a href="/viewer.html" class="nav-link">Visualizador</a>
+        </nav>
+
+        <div class="status">
+            <div class="status-indicator">
+                <span id="status-dot" class="status-dot"></span>
+                <span id="status-text">Conectando...</span>
+            </div>
+            <div class="date-selector">
+                <input type="date" id="date-picker">
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor principal (flexbox) -->
+    <div class="container">
+        <aside class="sidebar">
+            <div class="section">
+                <h3>Capas</h3>
+                <div class="layer-control">
+                    <label for="satellite-layer-checkbox">
+                        <input type="checkbox" id="satellite-layer-checkbox">
+                        Satélite
+                    </label>
+                    <input type="range" id="satellite-opacity-slider" min="0" max="1" step="0.1" value="0.8">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Coordenadas</h3>
+                <div id="info-box" class="info-box">
+                    Haz clic en el mapa para ver las coordenadas.
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="map" class="map"></div>
+        </main>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Cargando...</p>
+        <div class="loading-info">Esto puede tardar unos segundos.</div>
+    </div>
+
+    <!-- CORREGIDO: Ruta estática y versión consistente -->
+    <script src="/static/script.js?v=4.0"></script>
+
+</body>
+</html>
